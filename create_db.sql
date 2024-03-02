@@ -25,8 +25,8 @@ CREATE TABLE IF NOT EXISTS `robotics`.`Countries` (
   `name` NVARCHAR(100) NOT NULL,
   `code` VARCHAR(2) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
-  UNIQUE INDEX `code_UNIQUE` (`code` ASC) VISIBLE)
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
+  UNIQUE INDEX `code_UNIQUE` (`code` ASC))
 ENGINE = InnoDB;
 
 
@@ -42,8 +42,8 @@ CREATE TABLE IF NOT EXISTS `robotics`.`Districts` (
   `code` VARCHAR(20) NOT NULL,
   `name` NVARCHAR(120) NOT NULL,
   PRIMARY KEY (`id`, `Countries_id`),
-  INDEX `fk_Districts_Countries1_idx` (`Countries_id` ASC) VISIBLE,
-  UNIQUE INDEX `code_UNIQUE` (`numeric_code` ASC) VISIBLE,
+  INDEX `fk_Districts_Countries1_idx` (`Countries_id` ASC),
+  UNIQUE INDEX `code_UNIQUE` (`numeric_code` ASC),
   CONSTRAINT `fk_Districts_Countries1`
     FOREIGN KEY (`Countries_id`)
     REFERENCES `robotics`.`Countries` (`id`)
@@ -63,8 +63,8 @@ CREATE TABLE IF NOT EXISTS `robotics`.`Cities` (
   `numeric_code` INT NOT NULL,
   `name` NVARCHAR(120) NOT NULL,
   PRIMARY KEY (`id`, `Districts_id`),
-  INDEX `fk_Cities_Districts1_idx` (`Districts_id` ASC) VISIBLE,
-  UNIQUE INDEX `numeric_code_UNIQUE` (`numeric_code` ASC) VISIBLE,
+  INDEX `fk_Cities_Districts1_idx` (`Districts_id` ASC),
+  UNIQUE INDEX `numeric_code_UNIQUE` (`numeric_code` ASC),
   CONSTRAINT `fk_Cities_Districts1`
     FOREIGN KEY (`Districts_id`)
     REFERENCES `robotics`.`Districts` (`id`)
@@ -80,16 +80,16 @@ DROP TABLE IF EXISTS `robotics`.`Teams` ;
 
 CREATE TABLE IF NOT EXISTS `robotics`.`Teams` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `Cities_id` INT UNSIGNED NOT NULL,
-  `address` VARCHAR(100) NULL,
-  `name` VARCHAR(200) NOT NULL,
-  `nickname` VARCHAR(45) NULL,
+  `Cities_id` INT UNSIGNED NULL,
+  `address` VARCHAR(255) NULL,
+  `name` NVARCHAR(1027) NOT NULL,
+  `nickname` NVARCHAR(255) NULL,
   `rookie_year` YEAR NULL,
   `team_number` SMALLINT UNSIGNED NOT NULL,
-  `website` VARCHAR(45) NULL,
+  `website` NVARCHAR(255) NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
-  INDEX `fk_Teams_Cities1_idx` (`Cities_id` ASC) VISIBLE,
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
+  INDEX `fk_Teams_Cities1_idx` (`Cities_id` ASC),
   CONSTRAINT `fk_Teams_Cities1`
     FOREIGN KEY (`Cities_id`)
     REFERENCES `robotics`.`Cities` (`id`)
@@ -105,13 +105,16 @@ DROP TABLE IF EXISTS `robotics`.`Competitions` ;
 
 CREATE TABLE IF NOT EXISTS `robotics`.`Competitions` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `Cities_id` INT UNSIGNED NOT NULL,
+  `Cities_id` INT UNSIGNED NULL,
+  `code` VARCHAR(20) NOT NULL,
   `start_date` DATE NULL,
   `end_date` DATE NULL,
-  `name` VARCHAR(45) NULL,
-  `website` VARCHAR(45) NULL,
+  `name` NVARCHAR(1027) NOT NULL,
+  `website` NVARCHAR(255) NULL,
+  `address` NVARCHAR(255) NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_Competitions_Cities1_idx` (`Cities_id` ASC) VISIBLE,
+  INDEX `fk_Competitions_Cities1_idx` (`Cities_id` ASC),
+  UNIQUE INDEX `code_UNIQUE` (`code` ASC),
   CONSTRAINT `fk_Competitions_Cities1`
     FOREIGN KEY (`Cities_id`)
     REFERENCES `robotics`.`Cities` (`id`)
@@ -129,8 +132,8 @@ CREATE TABLE IF NOT EXISTS `robotics`.`Match_Type` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `type` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
-  UNIQUE INDEX `type_UNIQUE` (`type` ASC) VISIBLE)
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
+  UNIQUE INDEX `type_UNIQUE` (`type` ASC))
 ENGINE = InnoDB;
 
 
@@ -143,17 +146,19 @@ CREATE TABLE IF NOT EXISTS `robotics`.`Matches` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `Competitions_id` INT UNSIGNED NOT NULL,
   `Match_Type_id` INT UNSIGNED NOT NULL,
+  `code` VARCHAR(20) NOT NULL,
   `group1_score` SMALLINT NOT NULL,
   `group2_score` SMALLINT NOT NULL,
   `group_won` TINYINT NOT NULL,
   `match_number` SMALLINT UNSIGNED NULL,
   `start_datetime` DATETIME NULL,
   `end_datetime` DATETIME NULL,
-  `group1_rp` TINYINT NOT NULL,
-  `group2_rp` TINYINT NOT NULL,
+  `group1_rp` TINYINT NULL,
+  `group2_rp` TINYINT NULL,
   PRIMARY KEY (`id`, `Competitions_id`, `Match_Type_id`),
-  INDEX `fk_Matches_Competitions1_idx` (`Competitions_id` ASC) VISIBLE,
-  INDEX `fk_Matches_Match_Type1_idx` (`Match_Type_id` ASC) VISIBLE,
+  INDEX `fk_Matches_Competitions1_idx` (`Competitions_id` ASC),
+  INDEX `fk_Matches_Match_Type1_idx` (`Match_Type_id` ASC),
+  UNIQUE INDEX `code_UNIQUE` (`code` ASC),
   CONSTRAINT `fk_Matches_Competitions1`
     FOREIGN KEY (`Competitions_id`)
     REFERENCES `robotics`.`Competitions` (`id`)
@@ -176,7 +181,7 @@ CREATE TABLE IF NOT EXISTS `robotics`.`groups` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE)
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC))
 ENGINE = InnoDB;
 
 
@@ -192,9 +197,9 @@ CREATE TABLE IF NOT EXISTS `robotics`.`Matches_has_Teams` (
   `did_win` TINYINT NULL,
   `score` SMALLINT NULL,
   PRIMARY KEY (`Matches_id`, `groups_id`, `Teams_id`),
-  INDEX `fk_Matches_has_Teams_Teams1_idx` (`Teams_id` ASC) VISIBLE,
-  INDEX `fk_Matches_has_Teams_Matches_idx` (`Matches_id` ASC) VISIBLE,
-  INDEX `fk_Matches_has_Teams_table11_idx` (`groups_id` ASC) VISIBLE,
+  INDEX `fk_Matches_has_Teams_Teams1_idx` (`Teams_id` ASC),
+  INDEX `fk_Matches_has_Teams_Matches_idx` (`Matches_id` ASC),
+  INDEX `fk_Matches_has_Teams_table11_idx` (`groups_id` ASC),
   CONSTRAINT `fk_Matches_has_Teams_Matches`
     FOREIGN KEY (`Matches_id`)
     REFERENCES `robotics`.`Matches` (`id`)
@@ -224,8 +229,8 @@ CREATE TABLE IF NOT EXISTS `robotics`.`Teams_in_Competitions` (
   `ranking` SMALLINT NULL,
   `ranking_points` SMALLINT NULL,
   PRIMARY KEY (`Competitions_id`, `Teams_id`),
-  INDEX `fk_Competitions_has_Teams_Teams1_idx` (`Teams_id` ASC) VISIBLE,
-  INDEX `fk_Competitions_has_Teams_Competitions1_idx` (`Competitions_id` ASC) VISIBLE,
+  INDEX `fk_Competitions_has_Teams_Teams1_idx` (`Teams_id` ASC),
+  INDEX `fk_Competitions_has_Teams_Competitions1_idx` (`Competitions_id` ASC),
   CONSTRAINT `fk_Competitions_has_Teams_Competitions1`
     FOREIGN KEY (`Competitions_id`)
     REFERENCES `robotics`.`Competitions` (`id`)
@@ -249,8 +254,8 @@ CREATE TABLE IF NOT EXISTS `robotics`.`Alliances` (
   `Teams_id` INT UNSIGNED NOT NULL,
   `name` VARCHAR(45) NULL,
   PRIMARY KEY (`Competitions_id`, `Teams_id`),
-  INDEX `fk_Competitions_has_Teams1_Teams1_idx` (`Teams_id` ASC) VISIBLE,
-  INDEX `fk_Competitions_has_Teams1_Competitions1_idx` (`Competitions_id` ASC) VISIBLE,
+  INDEX `fk_Competitions_has_Teams1_Teams1_idx` (`Teams_id` ASC),
+  INDEX `fk_Competitions_has_Teams1_Competitions1_idx` (`Competitions_id` ASC),
   CONSTRAINT `fk_Competitions_has_Teams1_Competitions1`
     FOREIGN KEY (`Competitions_id`)
     REFERENCES `robotics`.`Competitions` (`id`)
@@ -273,7 +278,7 @@ CREATE TABLE IF NOT EXISTS `robotics`.`Pits` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `image` BLOB NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE)
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC))
 ENGINE = InnoDB;
 
 
@@ -287,9 +292,9 @@ CREATE TABLE IF NOT EXISTS `robotics`.`Pits_in_Competitions` (
   `Competitions_id` INT UNSIGNED NOT NULL,
   `Teams_id` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`Pits_id`, `Competitions_id`, `Teams_id`),
-  INDEX `fk_Pits_has_Competitions_Competitions1_idx` (`Competitions_id` ASC) VISIBLE,
-  INDEX `fk_Pits_has_Competitions_Pits1_idx` (`Pits_id` ASC) VISIBLE,
-  INDEX `fk_Pits_has_Competitions_Teams1_idx` (`Teams_id` ASC) VISIBLE,
+  INDEX `fk_Pits_has_Competitions_Competitions1_idx` (`Competitions_id` ASC),
+  INDEX `fk_Pits_has_Competitions_Pits1_idx` (`Pits_id` ASC),
+  INDEX `fk_Pits_has_Competitions_Teams1_idx` (`Teams_id` ASC),
   CONSTRAINT `fk_Pits_has_Competitions_Pits1`
     FOREIGN KEY (`Pits_id`)
     REFERENCES `robotics`.`Pits` (`id`)
@@ -318,7 +323,7 @@ CREATE TABLE IF NOT EXISTS `robotics`.`Awards` (
   `award_name` VARCHAR(45) NULL,
   `description` VARCHAR(45) NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE)
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC))
 ENGINE = InnoDB;
 
 
@@ -332,9 +337,9 @@ CREATE TABLE IF NOT EXISTS `robotics`.`Awards_in_Competitions` (
   `Competitions_id` INT UNSIGNED NOT NULL,
   `Teams_id` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`Awards_id`, `Competitions_id`, `Teams_id`),
-  INDEX `fk_Awards_has_Competitions_Competitions1_idx` (`Competitions_id` ASC) VISIBLE,
-  INDEX `fk_Awards_has_Competitions_Awards1_idx` (`Awards_id` ASC) VISIBLE,
-  INDEX `fk_Awards In Competitions_Teams1_idx` (`Teams_id` ASC) VISIBLE,
+  INDEX `fk_Awards_has_Competitions_Competitions1_idx` (`Competitions_id` ASC),
+  INDEX `fk_Awards_has_Competitions_Awards1_idx` (`Awards_id` ASC),
+  INDEX `fk_Awards In Competitions_Teams1_idx` (`Teams_id` ASC),
   CONSTRAINT `fk_Awards_has_Competitions_Awards1`
     FOREIGN KEY (`Awards_id`)
     REFERENCES `robotics`.`Awards` (`id`)
@@ -363,8 +368,8 @@ CREATE TABLE IF NOT EXISTS `robotics`.`Countries` (
   `name` NVARCHAR(100) NOT NULL,
   `code` VARCHAR(2) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
-  UNIQUE INDEX `code_UNIQUE` (`code` ASC) VISIBLE)
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
+  UNIQUE INDEX `code_UNIQUE` (`code` ASC))
 ENGINE = InnoDB;
 
 

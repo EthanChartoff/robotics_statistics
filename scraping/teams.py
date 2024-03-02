@@ -1,23 +1,48 @@
+from TBA_conn import *
 import requests
+import mysql.connector.errors
 
-# Replace with the actual URL you want to fetch data from
-url = "https://www.thebluealliance.com/api/v3/teams/0"
-api_key = "oV4Iu80aeCFWxA78W5HcBA8kjBStuSRhtVOwQYhJXaXvBopfnRKFh1R02REGNoAS"
 
-headers = {"X-TBA-Auth-Key": api_key}
+def insertTeams(conn):
+  sql = """
+  INSERT INTO `robotics`.`Teams`
+  (`Cities_id`,
+  `address`,
+  `name`,
+  `nickname`,
+  `rookie_year`,
+  `team_number`,
+  `website`)
+  VALUES
+  ((SELECT Cities.id FROM `robotics`.`Cities` WHERE Cities.name = %s LIMIT 1),
+  %s,
+  %s,
+  %s,
+  %s,
+  %s,
+  %s);
+  """
 
-try:
-  # Send the GET request and store the response
-  response = requests.get(url)
+  page_num = 0
+  cur = conn.cursor()
 
-  # Check if request was successful (status code 200)
-  if response.status_code == 200:
-    # Parse the JSON data from the response
-    data = response.json()
-    
-    # Print the data (or use it for further processing)
-    print(data)
-  else:
-    print(f"Error: Request failed with status code {response.status_code}")
-except requests.exceptions.RequestException as e:
-  print(f"Error: An error occurred while making the request: {e}")
+  try:
+    while page_num <= max_team / 500:    # each page has max 500 teams
+      page_url = f"/teams/{page_num}"
+      response = requests.get(base_url + page_url, headers=headers)
+      response.raise_for_status()
+      data = response.json()     
+
+      for team in data:
+        values = (team["city"], team["address"], team["name"], team["nickname"], team["rookie_year"], team["team_number"], team["website"])
+        cur.execute(sql, values)
+
+      page_num = page_num + 1
+  
+  except requests.exceptions.RequestException as e:
+    print(f"Error: An error occurred while making the request: {e}")
+  except mysql.connector.errors.IntegrityError as e:
+    print(f"Error: {e} \nTable: {team}")
+
+  finally:
+    cur.close()
