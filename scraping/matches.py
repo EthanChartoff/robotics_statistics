@@ -118,7 +118,7 @@ def insertMatches(conn):
     except requests.exceptions.RequestException as e:
         print(f"Error: An error occurred while making the request: {e}")
     except mysql.connector.errors.IntegrityError as e:
-        print(f"Error: {e} \nTable: {comp}")
+        print(f"Error: {e} \nTable: {match}")
     except mysql.connector.errors.DataError as e:
         print(f"Error: {e}")
     

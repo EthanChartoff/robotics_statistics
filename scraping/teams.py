@@ -27,7 +27,7 @@ def insertTeams(conn):
   cur = conn.cursor()
 
   try:
-    while page_num <= max_team / 500:    # each page has max 500 teams
+    while page_num <= max_team / 500:    
       page_url = f"/teams/{page_num}"
       response = requests.get(base_url + page_url, headers=headers)
       response.raise_for_status()
